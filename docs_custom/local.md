@@ -58,6 +58,26 @@ lsof -i :18789
 kill -9 <PID>
 ```
 
+### 6. Gateway Authentication
+
+OpenClaw supports **Token** (default) and **Password** authentication.
+
+- **Token Mode**: Auto-generated during setup. Found in `~/.openclaw/openclaw.json`.
+- **Password Mode**: Recommended for shared environments. Configure in `.env`:
+  ```env
+  OPENCLAW_GATEWAY_AUTH_MODE=password
+  OPENCLAW_GATEWAY_PASSWORD=YourSecurePassword
+  ```
+
+**Precedence Rules:**
+
+1. CLI Flag (`--auth password --password XYZ`)
+2. Environment Variables (`.env`)
+3. Config File (`openclaw.json`)
+
+**Verification:**
+Check logs on startup for: `[gateway] auth mode: password`.
+
 ---
 
 ## 🐳 Docker Development (M2 Optimized)
@@ -111,5 +131,6 @@ If you installed the gateway as a background service during onboarding, it may b
 
 - **Source Code**: `src/` (Backend), `ui/src/` (Control UI)
 - **Built Files**: `dist/`
+- **Environment**: `.env` (Local overrides)
 - **User Config**: `~/.openclaw/openclaw.json`
 - **Agent Workspace**: `~/.openclaw/workspace`

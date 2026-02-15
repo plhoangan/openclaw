@@ -71,7 +71,8 @@ export async function resolveGatewayRuntimeConfig(params: {
   };
   const tailscaleMode = tailscaleConfig.mode ?? "off";
   const resolvedAuth = resolveGatewayAuth({
-    authConfig,
+    authConfig: authBase,
+    authOverrides,
     env: process.env,
     tailscaleMode,
   });

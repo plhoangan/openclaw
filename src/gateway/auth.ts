@@ -184,21 +184,34 @@ async function resolveVerifiedTailscaleUser(params: {
 
 export function resolveGatewayAuth(params: {
   authConfig?: GatewayAuthConfig | null;
+  authOverrides?: GatewayAuthConfig | null;
   env?: NodeJS.ProcessEnv;
   tailscaleMode?: GatewayTailscaleMode;
 }): ResolvedGatewayAuth {
   const authConfig = params.authConfig ?? {};
+  const authOverrides = params.authOverrides ?? {};
   const env = params.env ?? process.env;
   const token =
-    authConfig.token ?? env.OPENCLAW_GATEWAY_TOKEN ?? env.CLAWDBOT_GATEWAY_TOKEN ?? undefined;
+    authOverrides.token ??
+    authConfig.token ??
+    env.OPENCLAW_GATEWAY_TOKEN ??
+    env.CLAWDBOT_GATEWAY_TOKEN ??
+    undefined;
   const password =
+    authOverrides.password ??
     authConfig.password ??
     env.OPENCLAW_GATEWAY_PASSWORD ??
     env.CLAWDBOT_GATEWAY_PASSWORD ??
     undefined;
-  const mode: ResolvedGatewayAuth["mode"] = authConfig.mode ?? (password ? "password" : "token");
+  const mode: ResolvedGatewayAuth["mode"] =
+    (authOverrides.mode as ResolvedGatewayAuth["mode"]) ??
+    (env.OPENCLAW_GATEWAY_AUTH_MODE as ResolvedGatewayAuth["mode"]) ??
+    (authConfig.mode as ResolvedGatewayAuth["mode"]) ??
+    (password ? "password" : "token");
   const allowTailscale =
-    authConfig.allowTailscale ?? (params.tailscaleMode === "serve" && mode !== "password");
+    authOverrides.allowTailscale ??
+    authConfig.allowTailscale ??
+    (params.tailscaleMode === "serve" && mode !== "password");
   return {
     mode,
     token,

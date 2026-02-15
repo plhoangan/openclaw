@@ -12,6 +12,7 @@ export function logGatewayStartup(params: {
   tlsEnabled?: boolean;
   log: { info: (msg: string, meta?: Record<string, unknown>) => void };
   isNixMode: boolean;
+  authMode: string;
 }) {
   const { provider: agentProvider, model: agentModel } = resolveConfiguredModelRef({
     cfg: params.cfg,
@@ -34,6 +35,7 @@ export function logGatewayStartup(params: {
     params.log.info(`listening on ${scheme}://${formatHost(host)}:${params.port}`);
   }
   params.log.info(`log file: ${getResolvedLoggerSettings().file}`);
+  params.log.info(`auth mode: ${params.authMode}`);
   if (params.isNixMode) {
     params.log.info("gateway: running in Nix mode (config managed externally)");
   }

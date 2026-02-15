@@ -190,14 +190,15 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   }
 
   const miskeys = extractGatewayMiskeys(snapshot?.parsed);
-  const authConfig = {
-    ...cfg.gateway?.auth,
+  const authBase = cfg.gateway?.auth ?? {};
+  const authOverrides = {
     ...(authMode ? { mode: authMode } : {}),
     ...(passwordRaw ? { password: passwordRaw } : {}),
     ...(tokenRaw ? { token: tokenRaw } : {}),
   };
   const resolvedAuth = resolveGatewayAuth({
-    authConfig,
+    authConfig: authBase,
+    authOverrides,
     env: process.env,
     tailscaleMode: tailscaleMode ?? cfg.gateway?.tailscale?.mode ?? "off",
   });

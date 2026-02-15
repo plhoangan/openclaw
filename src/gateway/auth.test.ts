@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authorizeGatewayConnect } from "./auth.js";
+import { authorizeGatewayConnect, resolveGatewayAuth } from "./auth.js";
 
 describe("gateway auth", () => {
   it("does not throw when req is missing socket", async () => {
@@ -97,5 +97,52 @@ describe("gateway auth", () => {
     expect(res.ok).toBe(true);
     expect(res.method).toBe("tailscale");
     expect(res.user).toBe("peter");
+  });
+});
+
+describe("resolveGatewayAuth", () => {
+  it("respects OPENCLAW_GATEWAY_AUTH_MODE", () => {
+    const auth = resolveGatewayAuth({
+      env: {
+        OPENCLAW_GATEWAY_AUTH_MODE: "password",
+        OPENCLAW_GATEWAY_PASSWORD: "secret",
+      },
+    });
+    expect(auth.mode).toBe("password");
+    expect(auth.password).toBe("secret");
+  });
+
+  it("prefers env.OPENCLAW_GATEWAY_AUTH_MODE over authConfig.mode", () => {
+    const auth = resolveGatewayAuth({
+      authConfig: { mode: "token" },
+      env: {
+        OPENCLAW_GATEWAY_AUTH_MODE: "password",
+        OPENCLAW_GATEWAY_PASSWORD: "secret",
+        OPENCLAW_GATEWAY_TOKEN: "token",
+      },
+    });
+    expect(auth.mode).toBe("password");
+    expect(auth.password).toBe("secret");
+  });
+
+  it("prefers authOverrides.mode over env.OPENCLAW_GATEWAY_AUTH_MODE", () => {
+    const auth = resolveGatewayAuth({
+      authOverrides: { mode: "token" },
+      env: {
+        OPENCLAW_GATEWAY_AUTH_MODE: "password",
+        OPENCLAW_GATEWAY_PASSWORD: "secret",
+      },
+    });
+    expect(auth.mode).toBe("token");
+  });
+
+  it("defaults to token if no password and no mode set", () => {
+    const auth = resolveGatewayAuth({
+      env: {
+        OPENCLAW_GATEWAY_TOKEN: "token",
+      },
+    });
+    expect(auth.mode).toBe("token");
+    expect(auth.token).toBe("token");
   });
 });
