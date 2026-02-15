@@ -272,3 +272,23 @@ export function resolveGatewayPort(
   }
   return DEFAULT_GATEWAY_PORT;
 }
+
+export function resolveGatewayBind(
+  cfg?: OpenClawConfig,
+  env: NodeJS.ProcessEnv = process.env,
+): import("./types.js").GatewayBindMode {
+  const envRaw = env.OPENCLAW_GATEWAY_BIND?.trim() || env.CLAWDBOT_GATEWAY_BIND?.trim();
+  if (envRaw) {
+    const bind = envRaw.toLowerCase();
+    if (
+      bind === "loopback" ||
+      bind === "lan" ||
+      bind === "tailnet" ||
+      bind === "auto" ||
+      bind === "custom"
+    ) {
+      return bind;
+    }
+  }
+  return cfg?.gateway?.bind ?? "loopback";
+}

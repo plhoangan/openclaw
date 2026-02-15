@@ -7,6 +7,7 @@ import {
   loadConfig,
   readConfigFileSnapshot,
   resolveGatewayPort,
+  resolveGatewayBind,
 } from "../../config/config.js";
 import { resolveGatewayAuth } from "../../gateway/auth.js";
 import { startGatewayServer } from "../../gateway/server.js";
@@ -174,15 +175,17 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     defaultRuntime.exit(1);
     return;
   }
-  const bindRaw = toOptionString(opts.bind) ?? cfg.gateway?.bind ?? "loopback";
-  const bind =
-    bindRaw === "loopback" ||
-    bindRaw === "lan" ||
-    bindRaw === "auto" ||
-    bindRaw === "custom" ||
-    bindRaw === "tailnet"
-      ? bindRaw
-      : null;
+  const bindOverride = toOptionString(opts.bind);
+  const bind = bindOverride
+    ? bindOverride === "loopback" ||
+      bindOverride === "lan" ||
+      bindOverride === "auto" ||
+      bindOverride === "custom" ||
+      bindOverride === "tailnet"
+      ? bindOverride
+      : null
+    : resolveGatewayBind(cfg);
+
   if (!bind) {
     defaultRuntime.error('Invalid --bind (use "loopback", "lan", "tailnet", "auto", or "custom")');
     defaultRuntime.exit(1);
