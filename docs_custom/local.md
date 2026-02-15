@@ -80,17 +80,31 @@ Check logs on startup for: `[gateway] auth mode: password`.
 
 ---
 
-## 🐳 Docker Development (M2 Optimized)
+## 🐳 Running with Docker (M2 Optimized)
 
-The repository includes a development-specific Docker Compose file optimized for Apple Silicon:
+The repository provides two ways to run OpenClaw in Docker, optimized for Apple Silicon (M2). Both methods automatically load configuration from your `.env` file.
+
+### Choice 1: Development Mode (Hot-Reload)
+
+Best for active coding. It bind-mounts your source code and uses `pnpm gateway:watch`.
 
 ```bash
 docker compose -f docker-compose.dev.yml up
 ```
 
-- **Platform**: Uses `linux/arm64` for maximum performance on M1/M2 chips.
-- **Port Mapping**: Gateway defaults to `http://localhost:18789`.
-- **Hot-Reload**: Bind-mounts the source code for immediate updates.
+- **Features**: Instant reloads on file save, builds the image locally.
+- **Works via**: `env_file: .env` + bind mounts to `/app`.
+
+### Choice 2: Production Mode (Stable)
+
+Best for testing a specific release or running in the background.
+
+```bash
+docker compose -f docker-compose.prod.yml up
+```
+
+- **Features**: Uses a pre-built static image (`openclaw:local` by default), runs the compiled `dist/index.js`.
+- **Works via**: `env_file: .env` (automatically loads all settings from your `.env`).
 
 ---
 

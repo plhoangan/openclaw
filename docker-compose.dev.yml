@@ -1,0 +1,34 @@
+services:
+  openclaw-dev:
+    build:
+      context: .
+      args:
+        - OPENCLAW_DOCKER_APT_PACKAGES=${OPENCLAW_DOCKER_APT_PACKAGES:-}
+    platform: linux/arm64 # Optimized for Apple Silicon M2
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - HOME=/home/node
+      - TERM=xterm-256color
+      - OPENCLAW_CONFIG_DIR=/home/node/.openclaw
+      - OPENCLAW_WORKSPACE_DIR=/home/node/.openclaw/workspace
+    volumes:
+      # Bind mount the source code for hot-reloading
+      # Use :delegated for better performance on macOS
+      - .:/app:delegated
+      # Anonymous volume for node_modules to avoid host/container conflicts
+      # This ensures the container uses the dependencies installed during 'docker build'
+      - /app/node_modules
+      # Persistent storage for config and workspace
+      - ${OPENCLAW_CONFIG_DIR:-~/.openclaw}:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE_DIR:-~/.openclaw/workspace}:/home/node/.openclaw/workspace
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+    # Use watch mode for development
+    command: pnpm gateway:watch
+    init: true
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
